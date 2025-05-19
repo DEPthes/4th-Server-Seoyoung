@@ -1,13 +1,28 @@
 package hellojpa;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Member {
-    @Id
+    @Id @GeneratedValue
+    @Column(name = "MEMBER_ID")
     private Long id;
+
+    @Column(name = "USERNAME")
     private String Name;
+
+    @ManyToOne
+    @JoinColumn(name = "TEAM_ID", insertable = false, updatable = false)
+    private Team team;
+
+    @OneToOne
+    @JoinColumn(name = "LOCKER_ID")
+    private Locker locker;
+
+    @OneToMany(mappedBy = "member")
+    private List<MemberProduct> memberproducts = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -17,11 +32,13 @@ public class Member {
         this.id = id;
     }
 
-    public String getName() {
+    public String getUserName() {
         return Name;
     }
 
-    public void setName(String name) {
+    public void setUserName(String name) {
         Name = name;
     }
+
+
 }
