@@ -55,7 +55,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 attributes,
                 "id",
                 nickname,
-                email
+                email,
+                member
         );
     }
 }

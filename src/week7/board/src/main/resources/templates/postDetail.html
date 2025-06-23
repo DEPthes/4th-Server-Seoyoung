@@ -26,6 +26,17 @@
 <hr/>
 <a href="/posts">전체 게시글 목록</a>
 <a href="/posts/mine">내 게시글 목록</a>
+
+<hr/>
+<h4>댓글 작성</h4>
+<form id="commentForm">
+    <textarea id="commentContent" rows="4" cols="50" placeholder="댓글을 입력하세요" required></textarea><br/>
+    <button type="submit">등록</button>
+</form>
+
+<h3>댓글</h3>
+<ul id="commentList"></ul>
+
 <script>
     const postId = window.location.pathname.split("/").pop();
 
@@ -68,6 +79,142 @@
                 console.error(err);
             });
     });
+
+    // 댓글 불러오기
+    fetch(`/api/comments/post/${postId}`)
+        .then(res => res.json())
+        .then(comments => {
+            const commentList = document.getElementById("commentList");
+            commentList.innerHTML = "";
+
+            comments.forEach(comment => {
+                const li = document.createElement("li");
+
+                li.innerHTML = `
+        <strong>${comment.authorNickname}</strong> - ${new Date(comment.createdAt).toLocaleString()}<br/>
+        <span class="comment-content" data-id="${comment.id}">${comment.content}</span>
+        ${comment.isMine ? `
+            <button class="editBtn" data-id="${comment.id}">수정</button>
+            <form class="editForm" data-id="${comment.id}" style="display:none;">
+                <textarea rows="2" cols="50" class="editContent">${comment.content}</textarea><br/>
+                <button type="submit">수정 완료</button>
+                <button type="button" class="cancelEditBtn">취소</button>
+            </form>
+            <button class="deleteBtn" data-id="${comment.id}">삭제</button>
+        ` : ""}
+    `;
+
+                commentList.appendChild(li);
+            });
+
+
+            // 수정 버튼 클릭 시 폼 표시
+            document.querySelectorAll(".editBtn").forEach(button => {
+                button.addEventListener("click", e => {
+                    const id = e.target.dataset.id;
+                    document.querySelector(`form[data-id='${id}']`).style.display = "block";
+                    e.target.style.display = "none"; // 수정 버튼 숨김
+                });
+            });
+
+            // 수정 취소 버튼
+            document.querySelectorAll(".cancelEditBtn").forEach(button => {
+                button.addEventListener("click", e => {
+                    const form = e.target.closest("form");
+                    const id = form.dataset.id;
+                    form.style.display = "none";
+                    document.querySelector(`button.editBtn[data-id='${id}']`).style.display = "inline";
+                });
+            });
+
+            // 수정 완료
+            document.querySelectorAll(".editForm").forEach(form => {
+                form.addEventListener("submit", e => {
+                    e.preventDefault();
+                    const id = form.dataset.id;
+                    const newContent = form.querySelector(".editContent").value;
+
+                    fetch(`/api/comments/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ content: newContent })
+                    })
+                        .then(res => {
+                            if (!res.ok) throw new Error("수정 실패");
+                            return res.json();
+                        })
+                        .then(() => {
+                            alert("댓글 수정 완료!");
+                            location.reload();
+                        })
+                        .catch(err => {
+                            alert("수정 중 오류 발생");
+                            console.error(err);
+                        });
+                });
+            });
+
+            document.querySelectorAll(".deleteBtn").forEach(button => {
+                button.addEventListener("click", e => {
+                    const commentId = e.target.dataset.id;
+                    if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+                    fetch(`/api/comments/${commentId}`, {
+                        method: 'DELETE'
+                    })
+                        .then(res => {
+                            if (res.status === 204) {
+                                alert("댓글 삭제 완료!");
+                                location.reload();
+                            } else if (res.status === 403) {
+                                alert("본인의 댓글만 삭제할 수 있습니다.");
+                            } else {
+                                alert("삭제 실패");
+                            }
+                        })
+                        .catch(err => {
+                            alert("에러 발생");
+                            console.error(err);
+                        });
+                });
+            });
+        });
+
+    //댓글 삭제
+
+
+
+    //댓글 작성
+    document.getElementById("commentForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const content = document.getElementById("commentContent").value.trim();
+        if (!content) return alert("댓글을 입력해주세요.");
+
+        fetch(`/api/comments/post/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content })
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("등록 실패");
+                return res.json();
+            })
+            .then(newComment => {
+                alert("댓글이 등록되었습니다.");
+                document.getElementById("commentContent").value = "";
+                location.reload();  // 또는 댓글 목록만 다시 fetch해도 됨
+            })
+            .catch(err => {
+                alert("댓글 등록 실패");
+                console.error(err);
+            });
+    });
+
 </script>
 
 
