@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 작성</title>
+</head>
+<body>
+
+<h2>게시글 작성</h2>
+
+<form id="createForm">
+    <input type="text" id="title" placeholder="제목" required />
+    <textarea id="content" placeholder="내용" rows="10" cols="50" required></textarea>
+    <button type="submit">작성하기</button>
+</form>
+
+<script>
+    document.getElementById("createForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const title = document.getElementById("title").value;
+        const content = document.getElementById("content").value;
+
+        fetch('/api/posts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ title, content })
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("작성 완료!");
+                    window.location.href = "/posts";
+                } else {
+                    alert("작성 실패!");
+                }
+            });
+    });
+</script>
+
+<a href="/posts">목록으로</a>
+
+</body>
+</html>

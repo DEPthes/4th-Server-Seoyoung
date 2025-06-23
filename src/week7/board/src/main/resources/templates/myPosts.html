@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>내 게시글</title>
+</head>
+<body>
+
+<h2>내가 작성한 게시글</h2>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>제목</th>
+        <th>작성일</th>
+        <th>수정</th>
+    </tr>
+    </thead>
+    <tbody id="myPostsTable">
+    <!-- JavaScript로 동적으로 데이터 렌더링 -->
+    </tbody>
+</table>
+
+<a href="/">홈으로</a>
+
+<script>
+    fetch("/api/posts/mine")
+        .then(res => {
+            if (!res.ok) throw new Error("불러오기 실패");
+            return res.json();
+        })
+        .then(data => {
+            const tbody = document.getElementById("myPostsTable");
+
+            data.forEach(post => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${post.id}</td>
+                    <td><a href="/posts/${post.id}">${post.title}</a></td>
+                    <td>${new Date(post.createdAt).toLocaleString()}</td>
+                    <td><a href="/posts/edit/${post.id}">수정</a></td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        })
+        .catch(() => {
+            alert("내 게시글 목록을 불러오지 못했습니다.");
+        });
+</script>
+
+</body>
+</html>

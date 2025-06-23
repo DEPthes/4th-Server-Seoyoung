@@ -10,16 +10,24 @@ import java.util.Map;
 public class CustomOAuth2User extends DefaultOAuth2User {
 
     private final String nickname;
+    private final String email;
 
     public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities,
                             Map<String, Object> attributes,
                             String nameAttributeKey,
-                            String nickname) {
+                            String nickname,
+                            String email) {
         super(authorities, attributes, nameAttributeKey);
         this.nickname = nickname;
+        this.email = email;
+
     }
 
     public String getNickname() {
         return nickname;
+    }
+
+    public String getEmail() { // ]
+        return email;
     }
 }

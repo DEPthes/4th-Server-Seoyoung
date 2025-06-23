@@ -6,6 +6,16 @@
 </head>
 <body>
 <h2>홈 페이지</h2>
+<nav>
+    <ul>
+        <li><a href="/posts">게시글 목록</a></li>
+        <li><a href="/posts/create">게시글 작성</a></li>
+        <li><a href="/posts/mine">내 게시글</a></li>
+    </ul>
+</nav>
+
+
+
 <!-- 로그인한 사용자 정보 -->
 <div th:if="${#authentication.authenticated}">
     <p><strong>닉네임:</strong> <span th:text="${#authentication.principal.nickname}"></span></p>

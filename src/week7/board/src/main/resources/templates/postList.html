@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>전체 게시글 목록</title>
+</head>
+<body>
+
+<h2>게시글 목록</h2>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>제목</th>
+        <th>작성자</th>
+        <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody id="postTableBody">
+    <!-- JS로 동적으로 채워짐 -->
+    </tbody>
+</table>
+
+<a href="/posts/create">새 글 작성하기</a>
+<a href="/">홈으로</a>
+
+<script>
+    // 게시글 목록 불러오기
+    fetch('/api/posts')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("postTableBody");
+
+            data.forEach(post => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${post.id}</td>
+                    <td><a href="/posts/${post.id}">${post.title}</a></td>
+                    <td>${post.authorNickname}</td>
+                    <td>${new Date(post.createdAt).toLocaleString()}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        })
+        .catch(() => {
+            alert("게시글 목록을 불러오지 못했습니다.");
+        });
+</script>
+
+</body>
+</html>
