@@ -41,7 +41,6 @@ public class PostApiController {
                     .orElse(null);
         }
 
-        // 여기서 final로 복사
         final Long finalCurrentUserId = currentUserId;
 
         return postService.getAllPosts()
@@ -133,8 +132,17 @@ public class PostApiController {
     public ResponseEntity<PostResponseDto> getPost(@PathVariable Long id,
                                                    @AuthenticationPrincipal Object principal) {
         PostEntity post = postService.getPostById(id);
-        MemberEntity member = getAuthenticatedMember(principal);
-        boolean mine = post.getMember().getId().equals(member.getId());
+
+        boolean mine = false;
+        if (principal instanceof CustomUserDetails customUser) {
+            Long currentUserId = memberRepository.findByEmail(customUser.getUsername())
+                    .map(MemberEntity::getId).orElse(null);
+            mine = currentUserId != null && post.getMember().getId().equals(currentUserId);
+        } else if (principal instanceof CustomOAuth2User oauthUser) {
+            Long currentUserId = memberRepository.findByEmail(oauthUser.getEmail())
+                    .map(MemberEntity::getId).orElse(null);
+            mine = currentUserId != null && post.getMember().getId().equals(currentUserId);
+        }
 
         return ResponseEntity.ok(new PostResponseDto(post, mine));
     }
