@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" href="/css/login.css">
     <meta charset="UTF-8">
     <title>로그인</title>
 </head>
@@ -8,6 +9,7 @@
 <h2>로그인 페이지</h2>
 
 <!--일반 로그인 폼 -->
+<div id="login_div">
 <form th:action="@{/login}" method="post">
     <label for="email">이메일:</label>
     <input type="text" id="email" name="email" required>
@@ -20,18 +22,22 @@
 
 <br><br>
 
+    <div id="bottom">
 <!-- 카카오 로그인 버튼 -->
 <a href="/oauth2/authorization/kakao">
     <img src="/image/kakao_login_medium_narrow.png"
-         alt="카카오 로그인" width="222" />
+         alt="카카오 로그인"  />
 </a>
+    <!-- 회원가입 버튼 -->
+    <a href="/signup">
+        <button id="signup">회원가입</button>
+    </a>
+    </div>
+</div>
 
 <br><br>
 
-<!-- 회원가입 버튼 -->
-<a href="/signup">
-    <button>회원가입</button>
-</a>
+
 
 </body>
 </html>
