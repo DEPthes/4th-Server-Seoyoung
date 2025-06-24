@@ -29,11 +29,25 @@ public class PostApiController {
     // 게시글 목록 API (GET)
     @GetMapping
     public List<PostResponseDto> getAllPosts(@AuthenticationPrincipal Object principal) {
-        MemberEntity currentUser = getAuthenticatedMember(principal);
+        Long currentUserId = null;
+
+        if (principal instanceof CustomUserDetails customUser) {
+            currentUserId = memberRepository.findByEmail(customUser.getUsername())
+                    .map(MemberEntity::getId)
+                    .orElse(null);
+        } else if (principal instanceof CustomOAuth2User oauthUser) {
+            currentUserId = memberRepository.findByEmail(oauthUser.getEmail())
+                    .map(MemberEntity::getId)
+                    .orElse(null);
+        }
+
+        // 여기서 final로 복사
+        final Long finalCurrentUserId = currentUserId;
 
         return postService.getAllPosts()
                 .stream()
-                .map(post -> new PostResponseDto(post, post.getMember().getId().equals(currentUser.getId())))
+                .map(post -> new PostResponseDto(post,
+                        finalCurrentUserId != null && post.getMember().getId().equals(finalCurrentUserId)))
                 .collect(Collectors.toList());
     }
 

@@ -14,20 +14,45 @@
     </ul>
 </nav>
 
-
+<h3>최신 게시글</h3>
+<ul id="homePostList"></ul>
 
 <!-- 로그인한 사용자 정보 -->
-<div th:if="${#authentication.authenticated}">
-    <p><strong>닉네임:</strong> <span th:text="${#authentication.principal.nickname}"></span></p>
+<div th:if="${#authentication != null and #authentication.authenticated}">
+    <p th:if="${#authentication.principal instanceof T(com.example.board.security.CustomUserDetails)}">
+        <strong>닉네임:</strong> <span th:text="${#authentication.principal.member.nickname}"></span>
+    </p>
+    <p th:if="${#authentication.principal instanceof T(com.example.board.security.CustomOAuth2User)}">
+        <strong>닉네임:</strong> <span th:text="${#authentication.principal.nickname}"></span>
+    </p>
     <a href="/logout">로그아웃</a>
 </div>
 
 <!-- 로그인 안 했을 경우 -->
-<div th:unless="${#authentication.authenticated}">
+<div th:if="${#authentication == null or !#authentication.authenticated or #authentication.principal == 'anonymousUser'}">
     <p>로그인이 필요합니다.</p>
     <a href="/login">로그인 페이지로 이동</a>
 </div>
 
 
+
+<script>
+    fetch('/api/posts')
+        .then(res => res.json())
+        .then(posts => {
+            const list = document.getElementById("homePostList");
+            posts.forEach(post => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <a href="/posts/${post.id}">${post.title}</a>
+                    <small> (${new Date(post.createdAt).toLocaleDateString()})</small>
+                `;
+                list.appendChild(li);
+            });
+        })
+        .catch(err => {
+            console.error("게시글 목록 불러오기 실패:", err);
+        });
+</script>
 </body>
 </html>
