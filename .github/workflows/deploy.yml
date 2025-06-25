@@ -42,5 +42,5 @@ jobs:
           key: ${{ secrets.PEM_KEY }}
           script: |
             pkill -f 'java -jar' || true
-            nohup java -jar ~/app/*.jar > ~/app/app.log 2>&1 &
+            nohup java -jar ~/app/*.jar > ~/app/app.log 2>&1 & disown
             sleep 5
