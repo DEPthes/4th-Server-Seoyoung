@@ -33,6 +33,7 @@ jobs:
           key: ${{ secrets.PEM_KEY }}
           source: "src/week7/board/build/libs/board-0.0.1-SNAPSHOT.jar"
           target: "~/app"
+          strip_components: 5
 
       - name: SSH into EC2 and run the JAR
         uses: appleboy/ssh-action@v1.0.0
