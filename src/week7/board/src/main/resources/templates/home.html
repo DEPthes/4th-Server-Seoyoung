@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<link rel="stylesheet" href="/css/home.css">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+    <link rel="stylesheet" href="/css/home.css">
     <meta charset="UTF-8">
     <title>홈</title>
 </head>
@@ -19,18 +20,16 @@
 <ul id="homePostList"></ul>
 
 <!-- 로그인한 사용자 정보 -->
-<div th:if="${#authentication != null and #authentication.authenticated}">
-    <p th:if="${#authentication.principal instanceof T(com.example.board.security.CustomUserDetails)}">
-        <strong>닉네임:</strong> <span th:text="${#authentication.principal.member.nickname}"></span>
-    </p>
-    <p th:if="${#authentication.principal instanceof T(com.example.board.security.CustomOAuth2User)}">
-        <strong>닉네임:</strong> <span th:text="${#authentication.principal.nickname}"></span>
+<div sec:authorize="isAuthenticated()">
+    <p>
+        <strong>닉네임:</strong>
+        <span th:text="${#authentication.principal.member != null} ? ${#authentication.principal.member.nickname} : ${#authentication.principal.nickname}"></span>
     </p>
     <a href="/logout">로그아웃</a>
 </div>
 
-<!-- 로그인 안 했을 경우 -->
-<div th:if="${#authentication == null or !#authentication.authenticated or #authentication.principal == 'anonymousUser'}">
+<!-- 비로그인 사용자 정보 -->
+<div sec:authorize="isAnonymous()">
     <p>로그인이 필요합니다.</p>
     <a href="/login">로그인 페이지로 이동</a>
 </div>
@@ -38,11 +37,17 @@
 
 
 <script>
-    fetch('/api/posts')
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = parseInt(urlParams.get("page")) || 0;
+
+    fetch(`/api/posts?page=${page}`)
         .then(res => res.json())
-        .then(posts => {
+        .then(data => {
             const list = document.getElementById("homePostList");
-            posts.forEach(post => {
+            list.innerHTML = "";
+
+            // 게시글 렌더링
+            data.content.forEach(post => {
                 const li = document.createElement("li");
                 li.innerHTML = `
                     <a href="/posts/${post.id}">${post.title}</a>
@@ -50,6 +55,51 @@
                 `;
                 list.appendChild(li);
             });
+
+            // 페이지네이션 렌더링
+            const pagination = document.createElement("div");
+            pagination.style.marginTop = "20px";
+            pagination.style.textAlign = "center";
+
+            const currentPage = page;
+            const totalPages = data.totalPages;
+
+            // ◀ 이전 페이지
+            if (currentPage > 0) {
+                const prev = document.createElement("a");
+                prev.href = `/?page=${currentPage - 1}`;
+                prev.textContent = "◀";
+                prev.style.margin = "0 10px";
+                pagination.appendChild(prev);
+            }
+
+            // 페이지 숫자 (최대 4개)
+            let start = Math.max(0, currentPage - 2);
+            let end = Math.min(totalPages, start + 4);
+            if (end - start < 4) start = Math.max(0, end - 4);
+
+            for (let i = start; i < end; i++) {
+                const link = document.createElement("a");
+                link.href = `/?page=${i}`;
+                link.textContent = i + 1;
+                link.style.margin = "0 5px";
+                if (i === currentPage) {
+                    link.style.fontWeight = "bold";
+                    link.style.textDecoration = "underline";
+                }
+                pagination.appendChild(link);
+            }
+
+            // ▶ 다음 페이지
+            if (currentPage < totalPages - 1) {
+                const next = document.createElement("a");
+                next.href = `/?page=${currentPage + 1}`;
+                next.textContent = "▶";
+                next.style.margin = "0 10px";
+                pagination.appendChild(next);
+            }
+
+            list.after(pagination);
         })
         .catch(err => {
             console.error("게시글 목록 불러오기 실패:", err);

@@ -1,5 +1,7 @@
 package com.example.board.post;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +18,8 @@ public class PostService {
     }
 
     // 게시글 전체 조회
-    public List<PostEntity> getAllPosts() {
-        return postRepository.findAll();
+    public Page<PostEntity> getAllPosts(Pageable pageable) {
+        return postRepository.findAll(pageable);
     }
 
     // 게시글 이메일로 조회

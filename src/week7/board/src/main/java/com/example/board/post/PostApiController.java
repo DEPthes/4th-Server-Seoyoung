@@ -6,6 +6,10 @@ import com.example.board.post.dto.PostRequestDto;
 import com.example.board.post.dto.PostResponseDto;
 import com.example.board.security.CustomOAuth2User;
 import com.example.board.security.CustomUserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +32,9 @@ public class PostApiController {
 
     // 게시글 목록 API (GET)
     @GetMapping
-    public List<PostResponseDto> getAllPosts(@AuthenticationPrincipal Object principal) {
+    public Page<PostResponseDto> getAllPosts(@RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "10") int size,
+                                             @AuthenticationPrincipal Object principal) {
         Long currentUserId = null;
 
         if (principal instanceof CustomUserDetails customUser) {
@@ -43,12 +49,13 @@ public class PostApiController {
 
         final Long finalCurrentUserId = currentUserId;
 
-        return postService.getAllPosts()
-                .stream()
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return postService.getAllPosts(pageable)
                 .map(post -> new PostResponseDto(post,
-                        finalCurrentUserId != null && post.getMember().getId().equals(finalCurrentUserId)))
-                .collect(Collectors.toList());
+                        finalCurrentUserId != null && post.getMember().getId().equals(finalCurrentUserId)));
     }
+
 
 
     // 내가 쓴 게시글 조회
