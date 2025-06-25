@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="/css/postList.css">
+<head>
+    <meta charset="UTF-8">
+    <title>전체 게시글 목록</title>
+</head>
+<body>
+
+<h2>게시글 목록</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>제목</th>
+        <th>작성자</th>
+        <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody id="postTableBody">
+    <!-- JS로 동적으로 채워짐 -->
+    </tbody>
+</table>
+
+<a href="/posts/create">새 글 작성하기</a>
+<a href="/">홈으로</a>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = parseInt(urlParams.get("page") || "0");
+
+    fetch(`/api/posts?page=${page}`)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("postTableBody");
+            tbody.innerHTML = "";
+
+            data.content.forEach(post => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${post.id}</td>
+                    <td><a href="/posts/${post.id}">${post.title}</a></td>
+                    <td>${post.authorNickname}</td>
+                    <td>${new Date(post.createdAt).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // 페이지네이션
+            const pagination = document.createElement("div");
+            pagination.style.marginTop = "20px";
+            pagination.style.textAlign = "center";
+
+            const totalPages = data.totalPages;
+
+            // ◀ 이전
+            if (page > 0) {
+                const prev = document.createElement("a");
+                prev.href = `/posts?page=${page - 1}`;
+                prev.textContent = "◀";
+                prev.style.margin = "0 10px";
+                pagination.appendChild(prev);
+            }
+
+            // 페이지 숫자 최대 4개
+            let start = Math.max(0, page - 2);
+            let end = Math.min(totalPages, start + 4);
+            if (end - start < 4) start = Math.max(0, end - 4);
+
+            for (let i = start; i < end; i++) {
+                const link = document.createElement("a");
+                link.href = `/posts?page=${i}`;
+                link.textContent = i + 1;
+                link.style.margin = "0 5px";
+                if (i === page) {
+                    link.style.fontWeight = "bold";
+                    link.style.textDecoration = "underline";
+                }
+                pagination.appendChild(link);
+            }
+
+            // ▶ 다음
+            if (page < totalPages - 1) {
+                const next = document.createElement("a");
+                next.href = `/posts?page=${page + 1}`;
+                next.textContent = "▶";
+                next.style.margin = "0 10px";
+                pagination.appendChild(next);
+            }
+
+            document.body.appendChild(pagination);
+        })
+        .catch(() => {
+            alert("게시글 목록을 불러오지 못했습니다.");
+        });
+</script>
+
+
+
+</body>
+</html>

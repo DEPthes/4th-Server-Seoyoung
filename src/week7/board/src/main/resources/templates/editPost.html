@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" href="/css/createPost.css">
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+</head>
+<body><h2>게시글 수정</h2>
+
+<form id="editForm">
+    <div class="form-group">
+    <input type="text" id="title" th:value="${post.title}" required/>
+    </div>
+    <div class="form-group">
+    <textarea id="content" rows="10" cols="50" th:text="${post.content}"></textarea>
+    </div>
+    <button type="submit">수정 완료</button>
+</form>
+
+<a href="/posts/mine">내 게시글 목록으로</a>
+
+<script th:inline="javascript">
+    const postId = [[${post.id}]];
+
+    document.getElementById("editForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const title = document.getElementById("title").value;
+        const content = document.getElementById("content").value;
+
+        fetch(`/api/posts/${postId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ title, content })
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("수정 완료!");
+                    window.location.href = "/posts/mine";
+                } else {
+                    alert("수정 실패");
+                }
+            });
+    });
+</script>
+
+<a href="/posts/mine">내 게시글 목록으로</a>
+</body>
+</html>

@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* 행 사이에 간격 추가 */
+    background-color: transparent;
+}
+
+table th {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    font-weight: bold;
+    padding: 12px 15px;
+    text-align: left;
+    border: none;
+}
+
+table td {
+    background-color: #fff;
+    padding: 12px 15px;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+table tr {
+    border: none;
+    border-radius: 5px;
+}
+
+table tr:hover td {
+
+}
+
+
+a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+div {
+    margin-top: 20px;
+    display: inline-block;
+    margin-right: 20px;
+}
